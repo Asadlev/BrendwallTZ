@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Продукты</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('productForm');
+
+            // Функция для отправки данных формы на API
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const description = document.getElementById('description').value;
+                const price = document.getElementById('price').value;
+
+                fetch('/api/products/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        description: description,
+                        price: price,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.id) {
+                        // Если продукт создан успешно, обновляем список продуктов
+                        loadProducts();
+                    } else {
+                        console.log(data);  // В случае ошибки выводим её
+                    }
+                });
+            });
+
+            // Функция для загрузки списка продуктов
+            function loadProducts() {
+                fetch('/api/products/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const productList = document.getElementById('productList');
+                        productList.innerHTML = '';  // Очищаем предыдущие продукты
+
+                        data.forEach(product => {
+                            const productItem = document.createElement('tr');
+                            productItem.innerHTML = `
+                                <td>${product.name}</td>
+                                <td>${product.description}</td>
+                                <td>${product.price}</td>
+                            `;
+                            productList.appendChild(productItem);
+                        });
+                    });
+            }
+
+            // Загружаем продукты при загрузке страницы
+            loadProducts();
+        });
+    </script>
+</head>
+<body>
+    <h1>Продукты</h1>
+
+    <form id="productForm">
+        <label for="name">Название:</label>
+        <input type="text" id="name" name="name" required><br>
+
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description" required></textarea><br>
+
+        <label for="price">Цена:</label>
+        <input type="number" id="price" name="price" required><br>
+
+        <button type="submit">Добавить продукт</button>
+    </form>
+
+    <h2>Список продуктов</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Цена</th>
+            </tr>
+        </thead>
+        <tbody id="productList">
+            <!-- Продукты будут загружены сюда с помощью JavaScript -->
+        </tbody>
+    </table>
+</body>
+</html>
